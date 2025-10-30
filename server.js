@@ -25,12 +25,6 @@ async function connectDB() {
   }
 }
 
-connectDB().then(() => {
-  console.log('Database connected');
-}).catch(err => {
-  console.error('Database connection error:', err);
-});
-
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
@@ -38,8 +32,8 @@ app.use(helmet({
       frameAncestors: ["'self'"]
     }
   },
-  dnsPrefetchControl: { allow: false },
-  referrerPolicy: { policy: "same-origin" }
+  dnsPrefetchControl: false,
+  referrerPolicy: "same-origin"
 }));
 
 app.use('/public', express.static(process.cwd() + '/public'));

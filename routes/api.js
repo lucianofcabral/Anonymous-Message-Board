@@ -34,7 +34,6 @@ module.exports = function (app) {
           // Filter replies and add replycount
           const threadsWithFilteredReplies = threads.map(thread => {
             const filteredReplies = thread.replies
-              .filter(reply => !reply.reported)
               .sort((a, b) => new Date(b.created_on) - new Date(a.created_on)) // Sort by newest first
               .slice(0, 3) // Get first 3 (most recent)
               .map(reply => ({
@@ -71,9 +70,7 @@ module.exports = function (app) {
       const { thread_id, delete_password } = req.body;
       
       Thread.findById(thread_id, (err, thread) => {
-        if (err) return res.send('Error finding thread');
-        if (!thread) return res.send('Thread not found');
-        if (thread.delete_password !== delete_password) return res.send('incorrect password');
+        if (err || !thread || thread.delete_password !== delete_password) return res.send('incorrect password');
         
         Thread.findByIdAndDelete(thread_id, (err) => {
           if (err) return res.send('Error deleting thread');
@@ -153,12 +150,10 @@ module.exports = function (app) {
       const { thread_id, reply_id, delete_password } = req.body;
       
       Thread.findOne({ _id: thread_id, 'replies._id': reply_id }, (err, thread) => {
-        if (err) return res.send('Error finding thread');
-        if (!thread) return res.send('Thread not found');
+        if (err || !thread) return res.send('incorrect password');
         
         const reply = thread.replies.id(reply_id);
-        if (!reply) return res.send('Reply not found');
-        if (reply.delete_password !== delete_password) return res.send('incorrect password');
+        if (!reply || reply.delete_password !== delete_password) return res.send('incorrect password');
         
         reply.text = '[deleted]';
         thread.save((err) => {
