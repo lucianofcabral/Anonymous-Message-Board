@@ -92,7 +92,7 @@ module.exports = function (app) {
         thread_id,
         { 
           $push: { replies: newReply },
-          bumped_on: new Date()
+          bumped_on: newReply.created_on
         },
         { new: true },
         (err, thread) => {
@@ -114,7 +114,6 @@ module.exports = function (app) {
           
           // Filter out reported and delete_password from replies
           const filteredReplies = thread.replies
-            .filter(reply => !reply.reported)
             .map(reply => ({
               _id: reply._id,
               text: reply.text,

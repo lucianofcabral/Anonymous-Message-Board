@@ -36,6 +36,14 @@ app.use(helmet({
   referrerPolicy: "same-origin"
 }));
 
+// Additional security headers
+app.use((req, res, next) => {
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('X-DNS-Prefetch-Control', 'off');
+  res.setHeader('Referrer-Policy', 'same-origin');
+  next();
+});
+
 app.use('/public', express.static(process.cwd() + '/public'));
 
 app.use(cors({origin: '*'})); //For FCC testing purposes only
