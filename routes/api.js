@@ -126,6 +126,7 @@ module.exports = function (app) {
             _id: thread._id,
             text: thread.text,
             created_on: thread.created_on,
+            bumped_on: thread.bumped_on,
             replies: filteredReplies
           };
           
