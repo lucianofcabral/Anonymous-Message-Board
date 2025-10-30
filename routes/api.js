@@ -85,7 +85,8 @@ module.exports = function (app) {
       const newReply = {
         text,
         delete_password,
-        created_on: new Date()
+        created_on: new Date(),
+        reported: false
       };
       
       Thread.findByIdAndUpdate(
@@ -114,6 +115,7 @@ module.exports = function (app) {
           
           // Filter out reported and delete_password from replies
           const filteredReplies = thread.replies
+            .filter(reply => !reply.reported)
             .map(reply => ({
               _id: reply._id,
               text: reply.text,
