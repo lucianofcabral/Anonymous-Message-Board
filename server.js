@@ -1,14 +1,46 @@
 'use strict';
 require('dotenv').config();
+const mongoose = require('mongoose');
 const express     = require('express');
 const bodyParser  = require('body-parser');
 const cors        = require('cors');
+const helmet      = require('helmet');
 
 const apiRoutes         = require('./routes/api.js');
 const fccTestingRoutes  = require('./routes/fcctesting.js');
 const runner            = require('./test-runner');
 
 const app = express();
+
+// Database connection
+async function connectDB() {
+  if (process.env.NODE_ENV === 'test') {
+    const { MongoMemoryServer } = require('mongodb-memory-server');
+    const mongoServer = new MongoMemoryServer();
+    await mongoServer.start();
+    const mongoUri = mongoServer.getUri();
+    await mongoose.connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true });
+  } else {
+    await mongoose.connect(process.env.DB, { useNewUrlParser: true, useUnifiedTopology: true });
+  }
+}
+
+connectDB().then(() => {
+  console.log('Database connected');
+}).catch(err => {
+  console.error('Database connection error:', err);
+});
+
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      frameAncestors: ["'self'"]
+    }
+  },
+  dnsPrefetchControl: { allow: false },
+  referrerPolicy: { policy: "same-origin" }
+}));
 
 app.use('/public', express.static(process.cwd() + '/public'));
 
@@ -46,20 +78,26 @@ app.use(function(req, res, next) {
     .send('Not Found');
 });
 
-//Start our server and tests!
-const listener = app.listen(process.env.PORT || 3000, function () {
-  console.log('Your app is listening on port ' + listener.address().port);
-  if(process.env.NODE_ENV==='test') {
-    console.log('Running Tests...');
-    setTimeout(function () {
-      try {
-        runner.run();
-      } catch(e) {
-        console.log('Tests are not valid:');
-        console.error(e);
-      }
-    }, 1500);
-  }
-});
+connectDB().then(() => {
+  console.log('Database connected');
+  
+  //Start our server and tests!
+  const listener = app.listen(process.env.PORT || 3000, function () {
+    console.log('Your app is listening on port ' + listener.address().port);
+    if(process.env.NODE_ENV==='test') {
+      console.log('Running Tests...');
+      setTimeout(function () {
+        try {
+          runner.run();
+        } catch(e) {
+          console.log('Tests are not valid:');
+          console.error(e);
+        }
+      }, 1500);
+    }
+  });
 
-module.exports = app; //for testing
+  module.exports = app; //for testing
+}).catch(err => {
+  console.error('Database connection error:', err);
+});
