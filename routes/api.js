@@ -34,6 +34,7 @@ module.exports = function (app) {
           // Filter replies and add replycount
           const threadsWithFilteredReplies = threads.map(thread => {
             const filteredReplies = thread.replies
+              .filter(reply => !reply.reported)
               .sort((a, b) => new Date(b.created_on) - new Date(a.created_on)) // Sort by newest first
               .slice(0, 3) // Get first 3 (most recent)
               .map(reply => ({

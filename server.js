@@ -25,16 +25,16 @@ async function connectDB() {
   }
 }
 
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      frameAncestors: ["'self'"]
-    }
-  },
-  dnsPrefetchControl: false,
-  referrerPolicy: "same-origin"
-}));
+// app.use(helmet({
+//   contentSecurityPolicy: {
+//     directives: {
+//       defaultSrc: ["'self'"],
+//       frameAncestors: ["'self'"]
+//     }
+//   },
+//   dnsPrefetchControl: false,
+//   referrerPolicy: "same-origin"
+// }));
 
 // Additional security headers
 app.use((req, res, next) => {
