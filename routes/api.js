@@ -116,7 +116,6 @@ module.exports = function (app) {
           
           // Filter out reported and delete_password from replies
           const filteredReplies = thread.replies
-            .filter(reply => !reply.reported)
             .map(reply => ({
               _id: reply._id,
               text: reply.text,
